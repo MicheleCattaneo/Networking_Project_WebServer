@@ -11,6 +11,7 @@ public class Main {
    public static void main(String[] args) throws IOException {
       if(args.length > 1) {
          System.err.println("Bad Format: usage java <port-number>");
+         return;
       }
       server = args.length == 1 ? new Server(Integer.parseInt(args[0])) : new Server(80);
      if( server.setUp()) {

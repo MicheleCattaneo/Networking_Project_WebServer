@@ -58,14 +58,12 @@ public class HTTPRequest {
         return true;
     }
     /*
-PUT /cocacoca.html HTTP/1.1
-Host: matias.com 
+GET /cocacoca.html HTTP/1.1
+Host: michelecattaneo.ch 
 Connection: keep-alive
 Content-Length: 10
-Content-Type: applicatio/jonson
+Content-Type: application/jonson
 
-Ciao ti
-aw
      */
 
     private void setHeader(String header, String value) {
@@ -74,6 +72,14 @@ aw
 
     public String getMethod() {
         return method;
+    }
+
+    public String getVersion() {
+        return this.version;
+    }
+
+    public String getUrl() {
+        return this.url;
     }
 
     /**

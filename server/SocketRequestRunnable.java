@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.file.*;
 
 import server.message.HTTPRequest;
+import server.message.HTTPResponse;
 
 public class SocketRequestRunnable implements Runnable {
     private final Socket clientSocket;
@@ -42,9 +43,6 @@ public class SocketRequestRunnable implements Runnable {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         String line;
 
-        verifyURL("michelecattaneo.ch", "home.html");
-
-
         // read request line and headers
         while (!(line = reader.readLine()).equals("")) {
             request.parseAndComputeLine(line);
@@ -62,8 +60,12 @@ public class SocketRequestRunnable implements Runnable {
                 // Handle invalid request. Content-Length is missing
             }
         }
-        
-        request.toStringMio();
+        // TODO: generate response
+        HTTPResponse response = new HTTPResponse().handleRequest(request);
+        System.out.println(response.toString());
+
+
+        // request.toStringMio();
         closeConnection();
     }
 
