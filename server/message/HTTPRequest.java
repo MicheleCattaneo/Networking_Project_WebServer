@@ -19,6 +19,11 @@ public class HTTPRequest {
         this.body = "";
     }
 
+    /**
+     * Parse a given HTTP request line or header line and update the relative fields.
+     * @param line the HTTP request line or header line
+     * @return true on success, false otherwise.
+     */
     public boolean parseAndComputeLine(final String line) {
         String[] parsedLine = line.split(" ");
 
@@ -71,10 +76,19 @@ aw
         return method;
     }
 
+    /**
+     * Returns an optional String containing the value of the given header.
+     * @param header the given header String.
+     * @return An Optional<String> with the value if the header is present, an empty Optional otherwise.
+     */
     public Optional<String> getHeaderValue(final String header) {
         return headers.get(header) == null ? Optional.empty() : Optional.of(headers.get(header));
     }
 
+    /**
+     * Append the given String to the body of this request.
+     * @param line the line to append.
+     */
     public void appendBody(String line) {
         if (body.length() > 0) {
             body += '\n';

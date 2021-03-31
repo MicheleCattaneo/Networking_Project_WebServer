@@ -28,7 +28,7 @@ public class Server {
         activeConnection = new AtomicInteger(0);
         domainMap = new HashMap<>();
     }
-
+    
     public void start() throws IOException {
         isRunning = true;
         System.out.println("----> HTTP Server start on port " + PORT);
@@ -38,14 +38,24 @@ public class Server {
         }
     }
 
+    /**
+     * Stop accpeting requests to this server and starts an orderly shutdown of the thread pool.
+     */
     public void stop() {
         isRunning = false;
+        threadPool.shutdown();
     }
 
+    /**
+     * Increment the number of currently active connections. Thread safe.
+     */
     public void incActiveConnection() {
         activeConnection.getAndIncrement();
     }
 
+    /**
+     * Decrement the number of currently active connections. Thread safe.
+     */
     public void decActiveConnections() {
         activeConnection.getAndDecrement();
     }
@@ -86,6 +96,11 @@ public class Server {
         return true;
     }
 
+    /**
+     * Returns whether this server is serving the given domain
+     * @param domain the String of the domain name
+     * @return true if it is served, false otherwise
+     */
     public boolean hasDomain(final String domain) {
         return domainMap.get(domain) != null;
     }
