@@ -18,6 +18,7 @@ public class Server {
     private boolean isRunning;
     protected AtomicInteger activeConnection;
     private HashMap<String, DomainInformations> domainMap;
+    public final String serverRootPath; 
 
     private final int PORT;
 
@@ -27,8 +28,9 @@ public class Server {
         serverSocket = new ServerSocket(port);
         activeConnection = new AtomicInteger(0);
         domainMap = new HashMap<>();
+        serverRootPath = Path.of("").toAbsolutePath().toString();
     }
-    
+
     public void start() throws IOException {
         isRunning = true;
         System.out.println("----> HTTP Server start on port " + PORT);
@@ -65,8 +67,7 @@ public class Server {
      * @return true the setting up was succesful, false otherwise.
      */
     public boolean setUp() {
-        String serverRootPath = Path.of("").toAbsolutePath().toString();
-        String configFilePath = serverRootPath + "/vhosts.conf";
+        String configFilePath = this.serverRootPath + "/vhosts.conf";
         File configFile = new File(configFilePath);
         System.out.println("----> Setting up..");
         

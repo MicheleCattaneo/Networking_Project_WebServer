@@ -3,6 +3,9 @@ package server.message;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.time.LocalDateTime;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 
 enum StatusCode {
     OK("200 OK"),
@@ -29,10 +32,12 @@ public class HTTPResponse {
     private StatusCode status;
     private HashMap<String, String> headers;
     private String body;
+    private final String serverPath;
 
     public HTTPResponse() {
         headers = new HashMap<>();
         body = "";
+        serverPath = Path.of("").toAbsolutePath().toString();
     }
     
     /**
@@ -49,8 +54,14 @@ public class HTTPResponse {
             this.status = StatusCode.HTTP_VERSION_NOT_SUPPORTED;
             return this;
         }
-        
-        if (!hasPermissions(request.getUrl())) {
+
+        // TODO Get the actual host, if present, or default one if not present
+        // TODO HTTP/1.1 host header is not optional, check that if not there -> 400
+        // TODO if it's a POST, it is normal that the URL is not gonna point to a file, it's not there yet
+        urlExists("michelecattaneo.ch", request.getUrl());
+
+        //TODO  test
+        if (!hasPermissions("michelecattaneo.ch", "../michelecattaneo.ch/home.html")) {
             this.status = StatusCode.FORBIDDEN;
             return this;
         }
@@ -102,8 +113,48 @@ public class HTTPResponse {
         return this;
     }
 
-    private boolean hasPermissions(final String url) {
-        return !url.contains("../");
+    /**
+     * Check whether the Path $SERVER_PATH/host/url is an existing object
+     * @param host
+     * @param url
+     * @return
+     */
+    private boolean urlExists(final String host,final String url) {
+        try {
+            Path p = Paths.get(Path.of("").toAbsolutePath().toString() + "/" + host + "/" + url);
+            System.out.println(p + " ciao");
+            return true;
+        }
+        catch (InvalidPathException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Given the host and the url, get the CANONICAL path (unique, removed '../' ), and ensure that it starts with the same sub-path
+     * Care must be given, if the given parameters to not form a valid url, the method returns false, but not because 
+     * of a permission problem but because the object does not exist. Use this method AFTER having checked the validity of the host + url
+     * @param host
+     * @param url
+     * @return
+     */
+    private boolean hasPermissions(String host, String url) {
+        try {
+            String canonicalObjectPath = new File(serverPath, "/" + host + "/" + url).getCanonicalPath();
+            System.out.println(canonicalObjectPath);
+            String canonicalHostPath = new File(serverPath, "/" + host).getCanonicalPath();
+            
+            if(canonicalObjectPath.startsWith(canonicalHostPath)) {
+                return true;
+            }
+            return false;
+
+        } catch (IOException e) {
+            
+            e.printStackTrace();
+            return false;
+        }
+        
     }
     
     private boolean checkVersion(String version) {

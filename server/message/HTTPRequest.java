@@ -53,16 +53,17 @@ public class HTTPRequest {
             setHeader(parsedLine[0], parsedLine[1]);
         }
         else {
-            System.out.println(parsedLine[0]+ "Unknown Input");
+            System.out.println(parsedLine[0]+ " Unknown Input");
         }
         return true;
     }
     /*
-GET /cocacoca.html HTTP/1.1
+GET /home.html HTTP/1.1
 Host: michelecattaneo.ch 
 Connection: keep-alive
 Content-Length: 10
-Content-Type: application/jonson
+Content-Type: applicatio/jonson
+
 
      */
 
