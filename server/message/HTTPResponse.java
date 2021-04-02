@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Optional;
 
 enum StatusCode {
     OK("200 OK"),
@@ -33,11 +34,13 @@ public class HTTPResponse {
     private HashMap<String, String> headers;
     private String body;
     private final String serverPath;
+    private boolean lastResponse;
 
     public HTTPResponse() {
         headers = new HashMap<>();
         body = "";
         serverPath = Path.of("").toAbsolutePath().toString();
+        lastResponse = false;
     }
     
     /**
@@ -46,6 +49,16 @@ public class HTTPResponse {
      * @return the fully initialized response to be returned to the caller
      */
     public HTTPResponse handleRequest(final HTTPRequest request) {
+        
+        if (request.isMalformed()) {
+            this.version = "HTTP/1.0";
+            this.status = StatusCode.BAD_REQUEST;
+            return this;
+        }
+        // check if this response is the last one to be sent
+        if (request.getVersion().equals("HTTP/1.0") || shouldCloseConnection(request)) {
+            lastResponse = true;
+        }
 
         if (checkVersion(request.getVersion())){
             this.version = request.getVersion();
@@ -83,6 +96,7 @@ public class HTTPResponse {
                 return this;
         }
     }
+
     
    
     private HTTPResponse handleGET(final HTTPRequest request ) {
@@ -111,6 +125,16 @@ public class HTTPResponse {
     private HTTPResponse handleNTW21INFO(final HTTPRequest request ) {
         // TODO: build this response
         return this;
+    }
+
+    /**
+     * 
+     * @param request
+     * @return true if the connection should close else false
+     */
+    private boolean shouldCloseConnection(HTTPRequest request){
+        Optional<String> value = request.getHeaderValue("Connection");
+        return value.isPresent() && value.get().equalsIgnoreCase("close");
     }
 
     /**
@@ -143,7 +167,7 @@ public class HTTPResponse {
             String canonicalObjectPath = new File(serverPath, "/" + host + "/" + url).getCanonicalPath();
             System.out.println(canonicalObjectPath);
             String canonicalHostPath = new File(serverPath, "/" + host).getCanonicalPath();
-            
+
             if(canonicalObjectPath.startsWith(canonicalHostPath)) {
                 return true;
             }
@@ -159,6 +183,14 @@ public class HTTPResponse {
     
     private boolean checkVersion(String version) {
         return version.equals("HTTP/1.0") || version.equals("HTTP/1.1");
+    }
+
+    /**
+     * Check wheter this is the last response that should be sent, after which the connection will be closed.
+     * @return true if it's the last one, false otherwise
+     */
+    public boolean isLastOne() {
+        return lastResponse;
     }
 
 

@@ -37,35 +37,36 @@ public class SocketRequestRunnable implements Runnable {
         System.out.println("----> Handling clientSocket from " + clientSocket.getInetAddress());
         System.out.println("----> Open Connections: " + server.activeConnection);
 
-        InputStream input = clientSocket.getInputStream();
-        String clientAddress = clientSocket.getRemoteSocketAddress().toString();
+        HTTPResponse response = new HTTPResponse();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        String line;
+        do {
+            InputStream input = clientSocket.getInputStream();
+            String clientAddress = clientSocket.getRemoteSocketAddress().toString();
 
-        // read request line and headers
-        while (!(line = reader.readLine()).equals("")) {
-            request.parseAndComputeLine(line);
-        }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            String line;
 
-        // reader.readLine();
+            // read request line and headers
+            line = reader.readLine(); // read request line
+            if(request.parseRequestLine(line)) { 
+                while (!(line = reader.readLine()).equals("")) {
+                    request.parseAndComputeLine(line);
+                }
+            }
 
-        if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
-            if (request.getHeaderValue("Content-Length:").isPresent()) {
-
+            if (request.shouldHaveBody()) {
                 while ((line = reader.readLine()) != null) {
                     request.appendBody(line);
                 }
-            } else {
-                // Handle invalid request. Content-Length is missing
+               
             }
+            // TODO: generate response
+            response = new HTTPResponse().handleRequest(request);
+            request.toStringMio();
+            System.out.println(response.toString());
         }
-        // TODO: generate response
-        HTTPResponse response = new HTTPResponse().handleRequest(request);
-        System.out.println(response.toString());
+        while(!response.isLastOne());
 
-
-        // request.toStringMio();
         closeConnection();
     }
 
