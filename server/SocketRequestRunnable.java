@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.*;
 
@@ -33,22 +34,23 @@ public class SocketRequestRunnable implements Runnable {
 
     private void handleHTTPRequest() throws IOException {
         server.incActiveConnection();
-        
+
         System.out.println("----> Handling clientSocket from " + clientSocket.getInetAddress());
         System.out.println("----> Open Connections: " + server.activeConnection);
 
-        HTTPResponse response = new HTTPResponse();
-
+        HTTPResponse response;
         do {
+            response = new HTTPResponse();
             InputStream input = clientSocket.getInputStream();
-            String clientAddress = clientSocket.getRemoteSocketAddress().toString();
+            OutputStream output = clientSocket.getOutputStream();
+            // String clientAddress = clientSocket.getRemoteSocketAddress().toString();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             String line;
 
             // read request line and headers
             line = reader.readLine(); // read request line
-            if(request.parseRequestLine(line)) { 
+            if (request.parseRequestLine(line)) {
                 while (!(line = reader.readLine()).equals("")) {
                     request.parseAndComputeLine(line);
                 }
@@ -58,15 +60,16 @@ public class SocketRequestRunnable implements Runnable {
                 while ((line = reader.readLine()) != null) {
                     request.appendBody(line);
                 }
-               
+
             }
             // TODO: generate response
-            response = new HTTPResponse().handleRequest(request);
             request.toStringMio();
-            System.out.println(response.toString());
-        }
-        while(!response.isLastOne());
+            response = new HTTPResponse().handleRequest(request);
+            // System.out.println(response.toString());
+            output.write(response.toString().getBytes());
+            output.flush(); // the toilet
 
+        } while (!response.isLastOne());
         closeConnection();
     }
 
@@ -76,10 +79,10 @@ public class SocketRequestRunnable implements Runnable {
      * @param url
      * @return
      */
-    private boolean verifyURL(String host, String url){
+    private boolean verifyURL(String host, String url) {
         String serverRootPath = Path.of("").toAbsolutePath().toString();
         // alternatively: System.getProperty("user.dir");
-        
+
         // assert url does not get back into the file system or nulls are given
         if (host == null || url == null || url.contains("../")) {
             return false;
