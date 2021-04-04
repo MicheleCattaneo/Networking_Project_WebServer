@@ -74,6 +74,7 @@ public class HTTPResponse {
             } else {
                 this.version = "HTTP/1.0";
                 this.status = StatusCode.HTTP_VERSION_NOT_SUPPORTED;
+                lastResponse = true;
                 return this;
             }
     
