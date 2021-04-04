@@ -11,7 +11,7 @@ On success the server will start accepting and handling concurrent requests.
 
 The requests need to follow the http standards.
 
-Netcat example:
+**Netcat** example:
 
 Run the server on port 80 and run this command on a terminal to start a connection
 
@@ -26,6 +26,27 @@ GET /home.html HTTP/1.0
 
 To finish an http request you need  `\r\n` , in this case an empty line is delimiting your request and the response will be generated. In HTTP/1.0 the `Host` header is not mandatory, and in this case the first domain found in the `vhosts.conf` file will be used. With this version of http there is no support for `keep-alive` connections. More examples with `http/1.1` later.
 
+**Postman** example:
+
+Run the server of port 80 and use the following request line:
+
+```http
+GET http://localhost:80 /home.html
+```
+
+Then, on the headers tab, look at the hidden ones and remove the default `Host` header, as it will be set to be `localhost` . Use instead the desired host, as for example `michelecattaneo.ch`. Note that postman will use HTTP/1.1 by default and if you want the connection to close after the reponse the `Connection: close` header should be set.
+
 ### File System access
 
-Each domain has a dedicated folder. Requests to a specific host are limited in the access to files/objects that are inside that specific folder.
+Each domain has a dedicated folder. Requests to a specific host are limited in the access to files/objects that are inside that specific folder. For example:
+
+```http
+GET /../martinogiorgi.ch/home.html HTTP/1.1
+Host: michelecattaneo.ch
+Connection: close
+
+
+```
+
+Would return a `403 FORBIDDEN` as we would be trying to access a folder outside the scope of the Host folder.
+

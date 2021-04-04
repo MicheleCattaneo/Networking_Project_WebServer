@@ -3,6 +3,8 @@ package server.message;
 import java.util.HashMap;
 import java.util.Optional;
 
+import server.Server;
+
 /**
  * HTTPRequest
  */
@@ -15,8 +17,10 @@ public class HTTPRequest {
     private HashMap<String, String> headers;
     private String body;
     private boolean malformed;
+    private final Server server;
 
-    public HTTPRequest() {
+    public HTTPRequest(Server server) {
+        this.server = server;
         headers = new HashMap<>();
         this.body = "";
     }
@@ -165,7 +169,7 @@ public class HTTPRequest {
      */
     public void setHostIfNull() {
         if (version.equals("HTTP/1.0") && getHeaderValue("Host").isEmpty()) {
-            headers.put("Host", "michelecattaneo.ch"); // TODO: not hardcoded
+            headers.put("Host", server.getDefaultHost());
         }
 
     }

@@ -20,7 +20,7 @@ public class SocketRequestRunnable implements Runnable {
     public SocketRequestRunnable(final Socket clientSocket, final Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
-        this.request = new HTTPRequest();
+        this.request = new HTTPRequest(server);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class SocketRequestRunnable implements Runnable {
 
         HTTPResponse response;
         do {
-            response = new HTTPResponse();
+            response = new HTTPResponse(server);
             InputStream input = clientSocket.getInputStream();
             OutputStream output = clientSocket.getOutputStream();
             // String clientAddress = clientSocket.getRemoteSocketAddress().toString();
@@ -64,10 +64,10 @@ public class SocketRequestRunnable implements Runnable {
             }
             // TODO: generate response
             request.toStringMio();
-            response = new HTTPResponse().handleRequest(request);
+            response = new HTTPResponse(server).handleRequest(request);
             // System.out.println(response.toString());
             output.write(response.toString().getBytes());
-            output.flush(); // the toilet
+            output.flush();
 
         } while (!response.isLastOne());
         closeConnection();

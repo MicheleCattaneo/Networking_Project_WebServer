@@ -1,6 +1,6 @@
 package server;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.*;
 import java.nio.file.*;
+import java.security.KeyStore.Entry;
 
 public class Server {
     private final int THREAD_COUNT = Runtime.getRuntime().availableProcessors() + 1;
@@ -17,7 +18,7 @@ public class Server {
     private ServerSocket serverSocket;
     private boolean isRunning;
     protected AtomicInteger activeConnection;
-    private HashMap<String, DomainInformations> domainMap;
+    private LinkedHashMap<String, DomainInformations> domainMap;
     public final String serverRootPath; 
 
     private final int PORT;
@@ -27,7 +28,7 @@ public class Server {
         threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_COUNT);
         serverSocket = new ServerSocket(port);
         activeConnection = new AtomicInteger(0);
-        domainMap = new HashMap<>();
+        domainMap = new LinkedHashMap<>();
         serverRootPath = Path.of("").toAbsolutePath().toString();
     }
 
@@ -106,15 +107,36 @@ public class Server {
         return domainMap.get(domain) != null;
     }
 
-    private class DomainInformations {
+    /**
+     * Retrieve the default host, meaning the first host read in the vhosts.conf file.
+     * @return
+     */
+    public String getDefaultHost() {
+        return domainMap.keySet().iterator().next();      
+    }
+
+    /**
+     * Get a shallow copy of the Domain mapping of the server
+     * @return
+     */
+    public Object getDomainsInformations() {
+        return domainMap.clone();
+    }
+
+    /**
+     * Inner Class used as a container for the informations about the different hosts of this server.
+     */
+    public class DomainInformations {
         public final String entryPointFile;
         public final String memberEmail;
         public final String memberFullname;
 
-        public DomainInformations(final String entryPointFile, final String memberEmail, final String memberFullname ) {
+        public DomainInformations(final String entryPointFile, final String memberFullname, final String memberEmail ) {
             this.entryPointFile = entryPointFile;
             this.memberEmail = memberEmail;
             this.memberFullname = memberFullname;
         }
     }
+
+    
 }
