@@ -65,7 +65,7 @@ public class SocketRequestRunnable implements Runnable {
             // TODO: generate response
             request.toStringMio();
             response = new HTTPResponse(server).handleRequest(request);
-            // System.out.println(response.toString());
+            System.out.println(response.toString());
             output.write(response.toString().getBytes());
             output.flush();
 

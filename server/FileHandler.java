@@ -2,10 +2,14 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import jdk.jfr.events.FileWriteEvent;
 
 public class FileHandler {
 
@@ -26,9 +30,7 @@ public class FileHandler {
 
         try {
             String canonicalObjectPath = new File(serverPath, "/" + host + "/" + url).getCanonicalPath();
-            System.out.println(canonicalObjectPath);
             String canonicalHostPath = new File(serverPath, "/" + host).getCanonicalPath();
-            System.out.println(canonicalHostPath);
             if (canonicalObjectPath.startsWith(canonicalHostPath)) {
                 return true;
             }
@@ -44,6 +46,7 @@ public class FileHandler {
 
     /**
      * Retrieve from the given url the file extension.
+     * 
      * @param url the url
      * @return a String containing the file extension.
      */
@@ -54,9 +57,11 @@ public class FileHandler {
 
     /**
      * Check whether the file located at host + url exists.
+     * 
      * @param host the host, first part of the path
-     * @param url the url, second part of the host
-     * @return true if the path correspond to an actual file. Might be a folder or normal file.
+     * @param url  the url, second part of the host
+     * @return true if the path correspond to an actual file. Might be a folder or
+     *         normal file.
      */
     public static boolean isValidFile(String host, String url) {
         File f = new File(serverPath, host + url);
@@ -64,9 +69,11 @@ public class FileHandler {
     }
 
     /**
-     * Retrieve the content of a file, located at host + url, relative to the server path
+     * Retrieve the content of a file, located at host + url, relative to the server
+     * path
+     * 
      * @param host the host, the first part of the path
-     * @param url the url, the rest of the path
+     * @param url  the url, the rest of the path
      * @return a String containing the content of the file
      * @throws IOException
      */
@@ -75,8 +82,26 @@ public class FileHandler {
         return new String(Files.readAllBytes(Paths.get(fileName)));
     }
 
+    public static void createFile(String host, String url, String body) throws IOException {
+        File newFile = new File(host, url);
+        newFile.createNewFile();
+        FileWriter writer = new FileWriter(newFile);
+        writer.write(body);
+        writer.close();
+    }
+
+    public static void deleteFile(String host, String url) throws FileNotFoundException {
+        File file = new File(host, url);
+        if (file.exists()) {
+            file.delete();
+        } else {
+            throw new FileNotFoundException();
+        }
+    }
+
     /**
      * Maps a file extension to the corresponding MIME Type ( Conetent-Type )
+     * 
      * @param ext the extension String
      * @return the correct Content-Type header to return for the given extension
      */

@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.time.LocalDateTime;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Optional;
-
 
 import server.FileHandler;
 import server.Server;
@@ -63,12 +63,12 @@ public class HTTPResponse {
                 this.lastResponse = true;
                 return this;
             }
-    
+
             // check if this response is the last one to be sent
             if (request.getVersion().equals("HTTP/1.0") || shouldCloseConnection(request)) {
                 lastResponse = true;
             }
-    
+
             if (checkVersion(request.getVersion())) {
                 this.version = request.getVersion();
             } else {
@@ -77,19 +77,17 @@ public class HTTPResponse {
                 lastResponse = true;
                 return this;
             }
-    
+
             // TODO HTTP/1.1 host header is not optional, check that if not there -> 400
             // TODO if it's a POST, it is normal that the URL is not gonna point to a file,
             // it's not there yet
             // urlExists("michelecattaneo.ch", request.getUrl());
-    
+
             request.setHostIfNull();
             this.version = request.getVersion();
             switch (request.getMethod()) {
             case "GET":
                 return handleGET(request);
-            case "POST":
-                return handlePOST(request);
             case "PUT":
                 return handlePUT(request);
             case "DELETE":
@@ -100,9 +98,8 @@ public class HTTPResponse {
                 this.status = StatusCode.NOT_IMPLEMENTED;
                 return this;
             }
-    
-        }
-        catch(Exception e) {
+
+        } catch (Exception e) {
             if (e.getClass() == NullPointerException.class) {
                 System.out.println("NullPointer Exception catched");
                 this.status = StatusCode.INTERNAL_SERVER_ERROR;
@@ -139,7 +136,6 @@ public class HTTPResponse {
             headers.put("Content-Type", contentType);
             body = FileHandler.getBody(request.getHeaderValue("Host").get(), request.getUrl());
             this.status = StatusCode.OK;
-            System.out.println("response");
         } else {
             this.status = StatusCode.NOT_FOUND;
             this.headers.put("Date", LocalDateTime.now().toString());
@@ -148,35 +144,42 @@ public class HTTPResponse {
         return this;
     }
 
-    private HTTPResponse handlePOST(final HTTPRequest request) {
-        // TODO: build this response
-        return this;
-    }
-
     private HTTPResponse handlePUT(final HTTPRequest request) {
         // TODO: build this response
+        try {
+            FileHandler.createFile(request.getHeaderValue("Host").get(), request.getUrl(), request.getBody());
+            this.status = StatusCode.CREATED;
+            headers.put("Date", LocalDateTime.now().toString());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return this;
     }
 
     private HTTPResponse handleDELETE(final HTTPRequest request) {
-        // TODO: build this response
+        try {
+            FileHandler.deleteFile(request.getHeaderValue("Host").get(), request.getUrl());
+            this.status = StatusCode.OK;
+            headers.put("Date", LocalDateTime.now().toString());
+        } catch (FileNotFoundException e) {
+            this.status = StatusCode.NOT_FOUND;
+        }
         return this;
     }
 
-    private HTTPResponse handleNTW21INFO(final HTTPRequest request) throws NullPointerException{
-       
+    private HTTPResponse handleNTW21INFO(final HTTPRequest request) throws NullPointerException {
+
         Optional<String> host = request.getHeaderValue("Host");
-        if(host.isPresent()) {
+        if (host.isPresent()) {
             // System.out.println(host.get());
             this.status = StatusCode.OK;
             headers.put("Date", LocalDateTime.now().toString());
-            LinkedHashMap<String, DomainInformations> map =  (LinkedHashMap)server.getDomainsInformations();
+            LinkedHashMap<String, DomainInformations> map = (LinkedHashMap) server.getDomainsInformations();
             DomainInformations info = map.get(host.get());
-            
-            String body =   "The administrator of " +
-                            host.get() +
-                            " is " + info.memberFullname + ".\n" +
-                            "You can contact him at " + info.memberEmail + ".\n";
+
+            String body = "The administrator of " + host.get() + " is " + info.memberFullname + ".\n"
+                    + "You can contact him at " + info.memberEmail + ".\n";
             this.body = body;
         } else {
             // ideally we never are here as we set the default host

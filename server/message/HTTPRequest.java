@@ -113,6 +113,10 @@ public class HTTPRequest {
         return this.url;
     }
 
+    public String getBody() {
+        return this.body;
+    }
+
     /**
      * Returns an optional String containing the value of the given header.
      * 
