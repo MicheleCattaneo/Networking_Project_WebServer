@@ -18,7 +18,6 @@ public class SocketRequestRunnable implements Runnable {
     public SocketRequestRunnable(final Socket clientSocket, final Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
-        this.request = new HTTPRequest(server);
     }
 
     @Override
@@ -35,6 +34,7 @@ public class SocketRequestRunnable implements Runnable {
 
         HTTPResponse response;
         do {
+            request = new HTTPRequest(server);
             response = new HTTPResponse(server);
             InputStream input = clientSocket.getInputStream();
             OutputStream output = clientSocket.getOutputStream();
