@@ -12,22 +12,6 @@ import server.FileHandler;
 import server.Server;
 import server.Server.DomainInformations;
 
-enum StatusCode {
-    OK("200 OK"), CREATED("201 CREATED"), BAD_REQUEST("400 BAD REQUEST"), FORBIDDEN("403 FORBIDDEN"),
-    NOT_FOUND("404 NOT FOUND"), METHOD_NOT_ALLOWED("405 METHOD NOT ALLOWED"), NOT_IMPLEMENTED("501 NOT IMPLEMENTED"),
-    HTTP_VERSION_NOT_SUPPORTED("505 HTTP VERSION NOT SUPPORTED"), INTERNAL_SERVER_ERROR("500 Internal Server Error");
-
-    private String status;
-
-    public String getStatus() {
-        return this.status;
-    }
-
-    private StatusCode(final String status) {
-        this.status = status;
-    }
-}
-
 public class HTTPResponse {
     private String version;
     private StatusCode status;
@@ -142,6 +126,7 @@ public class HTTPResponse {
         } else {
             this.status = StatusCode.NOT_FOUND;
             this.headers.put("Date", LocalDateTime.now().toString());
+            lastResponse = true;
             return this;
         }
         return this;
@@ -152,6 +137,7 @@ public class HTTPResponse {
             // permissions
             this.status = StatusCode.FORBIDDEN;
             this.headers.put("Date", LocalDateTime.now().toString());
+            lastResponse = true;
             return this;
         }
 
@@ -159,6 +145,7 @@ public class HTTPResponse {
                 || Integer.parseInt(request.getHeaderValue("Content-Length").get()) != request.getBody().length()) {
             System.out.println("error");
             this.status = StatusCode.BAD_REQUEST;
+            lastResponse = true;
             return this;
         }
 
@@ -171,6 +158,7 @@ public class HTTPResponse {
         } catch (IOException e) {
             this.status = StatusCode.INTERNAL_SERVER_ERROR;
             headers.put("Date", LocalDateTime.now().toString());
+            lastResponse = true;
             return this;
         }
         return this;
@@ -181,6 +169,7 @@ public class HTTPResponse {
             // permissions
             this.status = StatusCode.FORBIDDEN;
             this.headers.put("Date", LocalDateTime.now().toString());
+            lastResponse = true;
             return this;
         }
         try {
@@ -189,6 +178,7 @@ public class HTTPResponse {
             headers.put("Date", LocalDateTime.now().toString());
         } catch (FileNotFoundException e) {
             this.status = StatusCode.NOT_FOUND;
+            lastResponse = true;
         }
         return this;
     }
@@ -211,6 +201,7 @@ public class HTTPResponse {
         } else {
             // ideally we never are here as we set the default host
             this.status = StatusCode.BAD_REQUEST;
+            lastResponse = true;
         }
         return this;
     }
@@ -258,5 +249,9 @@ public class HTTPResponse {
             return finalResult;
         }
         return result.getBytes();
+    }
+
+    public StatusCode getStatus() {
+        return this.status;
     }
 }
