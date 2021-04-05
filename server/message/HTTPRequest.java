@@ -28,7 +28,7 @@ public class HTTPRequest {
     /**
      * Parse a given HTTP request line and update the relative fields.
      * 
-     * @param line the HTTP request line or header line
+     * @param line the HTTP request line
      * @return true on success, false otherwise.
      */
     public boolean parseRequestLine(final String line) {
@@ -43,14 +43,29 @@ public class HTTPRequest {
         return true;
     }
 
+    /**
+     * Check whether this instance of request is malformed. Malformed can be set
+     * during the parsing or later using setMalformed if the malformity is found
+     * while handling the response.
+     * 
+     * @return true if this is malformed, false otherwise.
+     */
     public boolean isMalformed() {
         return malformed;
     }
 
     /**
-     * Parse a given HTTP or header line and update the relative fields.
+     * Set the malformed flag of this request in case this is found to not follow
+     * the http standards.
+     */
+    public void setMalformed() {
+        this.malformed = true;
+    }
+
+    /**
+     * Parse a given HTTP header line and update the relative fields.
      * 
-     * @param line the HTTP request line or header line
+     * @param line the HTTP header line
      * @return true on success, false otherwise.
      */
     public boolean parseAndComputeLine(final String line) {
@@ -74,7 +89,7 @@ public class HTTPRequest {
     }
 
     /**
-     * Check wheather the header is a known one to this implementation
+     * Check wheather the given header is a known one to this implementation.
      * 
      * @param header the header String
      * @return true if known, false otherwise
@@ -88,35 +103,57 @@ public class HTTPRequest {
         return false;
     }
 
+    /**
+     * Check whether this request had a method which requires to have a body.
+     * 
+     * @return true if it should, false otherwise.
+     */
     public boolean shouldHaveBody() {
         return method.equals("POST") || method.equals("PUT");
     }
-    /*
-     * GET /home.html HTTP/1.0 Host: michelecattaneo.ch Connection: Keep-Alive
-     * Content-Length: 10 Content-Type: applicatio/jonson
-     * 
-     * GET /home.html HTTP/1.1 Host: michelecattaneo.ch Connection: close
-     * Content-Length: 10 Content-Type: applicatio/jonson
-     * 
-     * 
-     */
 
+    /**
+     * Set a header value for the given header.
+     * 
+     * @param header the String corresponding to the header.
+     * @param value  the value of the header.
+     */
     private void setHeader(String header, String value) {
         headers.put(header, value);
     }
 
+    /**
+     * Get the method of this request.
+     * 
+     * @return the String corresponding to the method. Could be null.
+     */
     public String getMethod() {
         return method;
     }
 
+    /**
+     * Get the http version of this request.
+     * 
+     * @return the String corresponding to the http version. Could be null.
+     */
     public String getVersion() {
         return this.version;
     }
 
+    /**
+     * Get the url of this request.
+     * 
+     * @return the String corresponding to the url. Could be null.
+     */
     public String getUrl() {
         return this.url;
     }
 
+    /**
+     * Get the body of this request.
+     * 
+     * @return the String corresponding to the body. Could be null.
+     */
     public String getBody() {
         return this.body;
     }
@@ -144,6 +181,9 @@ public class HTTPRequest {
         body += line;
     }
 
+    /**
+     * Print this request
+     */
     public void toStringMio() {
         System.out.println(method + " " + url + " " + version);
 
@@ -160,7 +200,7 @@ public class HTTPRequest {
      */
     public void checkValidity() {
         // check host is necessary and/or present
-        if (version.equals("HTTP/1.1") && getHeaderValue("Host").isEmpty()) {
+        if (malformed || (version.equals("HTTP/1.1") && getHeaderValue("Host").isEmpty())) {
             malformed = true;
             return;
         }
@@ -189,7 +229,23 @@ public class HTTPRequest {
         return headers.get("Host");
     }
 
+    /**
+     * Set the url of this request. Used for the root entry point when "/" is
+     * requested.
+     * 
+     * @param url the ulr string
+     */
     public void setUrl(String url) {
         this.url = url;
     }
+
+    /**
+     * Return the Content-Length header value, if there is one.
+     * 
+     * @return the value of the Content-Length, -1 otherwise
+     */
+    public int getContentLength() {
+        return headers.get("Content-Length") == null ? -1 : Integer.parseInt(headers.get("Content-Length"));
+    }
+
 }

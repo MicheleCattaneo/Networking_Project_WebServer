@@ -19,9 +19,10 @@ public class FileHandler {
      * because of a permission problem but because the object does not exist. Use
      * this method AFTER having checked the validity of the host + url
      * 
-     * @param host
-     * @param url
-     * @return
+     * @param host the host
+     * @param url  the url
+     * @return True if the user has the permission to perform the action, false
+     *         otherwise
      */
     public static boolean hasPermissions(String host, String url) {
 
@@ -79,6 +80,15 @@ public class FileHandler {
         return Files.readAllBytes(Paths.get(fileName));
     }
 
+    /**
+     * Create the file with the body.
+     * 
+     * @param host the host
+     * @param url  the url
+     * @param body the body of the file
+     * @return True if the file was created, False if the file was edited
+     * @throws IOException error creating the file or writing to it
+     */
     public static boolean createFile(String host, String url, String body) throws IOException {
         File newFile = new File(host, url);
         boolean created = newFile.createNewFile();
@@ -88,6 +98,13 @@ public class FileHandler {
         return created;
     }
 
+    /**
+     * Delete a file.
+     * 
+     * @param host the host
+     * @param url  the url
+     * @throws FileNotFoundException file can't be found
+     */
     public static void deleteFile(String host, String url) throws FileNotFoundException {
         File file = new File(host, url);
         if (file.exists()) {
@@ -98,7 +115,7 @@ public class FileHandler {
     }
 
     /**
-     * Maps a file extension to the corresponding MIME Type ( Conetent-Type )
+     * Maps a file extension to the corresponding MIME Type ( Conetent-Type ).
      * 
      * @param ext the extension String
      * @return the correct Content-Type header to return for the given extension
@@ -122,7 +139,7 @@ public class FileHandler {
         if (ext.equalsIgnoreCase("html") || ext.equalsIgnoreCase("htm")) {
             return "text/html";
         }
-        // default one (?)
+        // default one
         return "text/plain";
     }
 

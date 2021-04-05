@@ -31,6 +31,9 @@ public class SocketRequestRunnable implements Runnable {
         }
     }
 
+    /**
+     * Handle the HTTP request.
+     */
     private void handleHTTPRequest() throws IOException {
         // System.out.println("----> Handling clientSocket from " +
         // clientSocket.getInetAddress());
@@ -53,9 +56,15 @@ public class SocketRequestRunnable implements Runnable {
                 }
             }
 
-            if (request.shouldHaveBody()) {
-                while ((line = reader.readLine()) != null) {
+            if (!request.isMalformed() && request.shouldHaveBody()) {
+                int byteSum = 0;
+                while (byteSum < request.getContentLength()) {
+                    line = reader.readLine();
                     request.appendBody(line);
+                    byteSum += line.getBytes().length;
+                }
+                if (byteSum != request.getContentLength()) {
+                    request.setMalformed();
                 }
 
             }
@@ -68,11 +77,22 @@ public class SocketRequestRunnable implements Runnable {
         closeConnection();
     }
 
+    /**
+     * Close this socket connection.
+     * 
+     * @throws IOException when the closing encounters an error.
+     */
     private void closeConnection() throws IOException {
         clientSocket.close();
-        // System.out.println("----> Closed connection");
+        System.out.println("----> Closed connection");
     }
 
+    /**
+     * Print a log for requests with Status Code, method and HTTP version.
+     * 
+     * @param req the request
+     * @param res the response
+     */
     private void log(HTTPRequest req, HTTPResponse res) {
         final String ANSI_RED = "\u001B[31m";
         final String ANSI_GREEN = "\u001B[32m";

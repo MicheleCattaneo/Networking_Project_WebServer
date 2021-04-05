@@ -28,17 +28,27 @@ public class Server {
         serverRootPath = Path.of("").toAbsolutePath().toString();
     }
 
-    public void start() throws IOException {
+    /**
+     * Start the server on its port. Submit a new task to the threadpool for each
+     * socket connection established.
+     * 
+     */
+    public void start() {
         isRunning = true;
-        System.out.println("----> HTTP Server start on port " + PORT);
+        System.out.println("\u001B[35m" + "# HTTP Server start on port " + "\u001B[0m" + PORT);
         while (isRunning) {
-            final Socket clientSocket = serverSocket.accept();
-            threadPool.submit(new SocketRequestRunnable(clientSocket, this));
+            try {
+                final Socket clientSocket = serverSocket.accept();
+                threadPool.submit(new SocketRequestRunnable(clientSocket, this));
+            } catch (IOException e) {
+                System.err.println("Socket error");
+                e.printStackTrace();
+            }
         }
     }
 
     /**
-     * Stop accpeting requests to this server and starts an orderly shutdown of the
+     * Stop accepting requests to this server and starts an orderly shutdown of the
      * thread pool.
      */
     public void stop() {
@@ -55,7 +65,7 @@ public class Server {
     public boolean setUp() {
         String configFilePath = this.serverRootPath + "/vhosts.conf";
         File configFile = new File(configFilePath);
-        System.out.println("----> Setting up..");
+        System.out.println("\u001B[36m" + "# Setting up..." + "\u001B[0m");
 
         try {
             FileReader freader = new FileReader(configFile);
@@ -74,8 +84,8 @@ public class Server {
                 domainMap.put(values[0], new DomainInformations(values[1], values[2], values[3]));
             }
 
-            breader.close();
             freader.close();
+            breader.close();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -97,21 +107,27 @@ public class Server {
      * Retrieve the default host, meaning the first host read in the vhosts.conf
      * file.
      * 
-     * @return
+     * @return the default host name
      */
     public String getDefaultHost() {
         return domainMap.keySet().iterator().next();
     }
 
     /**
-     * Get a shallow copy of the Domain mapping of the server
+     * Get a shallow copy of the Domain mapping of the server.
      * 
-     * @return
+     * @return the copy of the Domain mapping
      */
     public Object getDomainsInformations() {
         return domainMap.clone();
     }
 
+    /**
+     * Return the entry point of a Host.
+     * 
+     * @param host the host
+     * @return the entry point for that host
+     */
     public String getEntryPoint(final String host) {
         DomainInformations d = domainMap.get(host);
         if (d == null) {
