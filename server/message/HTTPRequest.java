@@ -62,9 +62,13 @@ public class HTTPRequest {
         }
 
         if (isKnownHeader(parsedLine[0])) {
-            setHeader(parsedLine[0], parsedLine[1]);
-        } else {
-            // System.out.println(parsedLine[0] + " Unknown Input");
+            if (headers.get(parsedLine[0]) == null) {
+                setHeader(parsedLine[0], parsedLine[1]);
+            } else {
+                // if there is a duplicate header in the request being parsed
+                malformed = true;
+                return false;
+            }
         }
         return true;
     }
@@ -156,25 +160,36 @@ public class HTTPRequest {
      */
     public void checkValidity() {
         // check host is necessary and/or present
-        if (version.equals("HTTP/1.1") && !getHeaderValue("Host").isPresent()) {
+        if (version.equals("HTTP/1.1") && getHeaderValue("Host").isEmpty()) {
             malformed = true;
             return;
         }
         // check if version 1.0 and there is not a Content-Length header
         if ((method.equals("PUT") || method.equals("POST")) && version.equals("HTTP/1.0")
-                && !getHeaderValue("Content-Length").isPresent()) {
+                && getHeaderValue("Content-Length").isEmpty()) {
+            malformed = true;
+            return;
+        }
+        // Check if Host header is present and if the specified Host actually exists in
+        // the server
+        if (getHeaderValue("Host").isPresent() && !server.hasDomain(getHeaderValue("Host").get())) {
             malformed = true;
             return;
         }
     }
 
     /**
-     * Set the default host if we have a HTTP1.0, where the host is optional
+     * Set the default host if we have a HTTP1.0, where the host is optional In any
+     * case return the host of the request.
      */
-    public void setHostIfNull() {
+    public String setHostIfNull() {
         if (version.equals("HTTP/1.0") && getHeaderValue("Host").isEmpty()) {
             headers.put("Host", server.getDefaultHost());
         }
+        return headers.get("Host");
+    }
 
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

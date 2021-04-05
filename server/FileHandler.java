@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import jdk.jfr.events.FileWriteEvent;
-
 public class FileHandler {
 
     private final static String serverPath = Path.of("").toAbsolutePath().toString();
@@ -77,17 +75,18 @@ public class FileHandler {
      * @return a String containing the content of the file
      * @throws IOException
      */
-    public static String getBody(String host, String url) throws IOException {
+    public static byte[] getBody(String host, String url) throws IOException {
         String fileName = serverPath + "/" + host + url;
-        return new String(Files.readAllBytes(Paths.get(fileName)));
+        return Files.readAllBytes(Paths.get(fileName));
     }
 
-    public static void createFile(String host, String url, String body) throws IOException {
+    public static boolean createFile(String host, String url, String body) throws IOException {
         File newFile = new File(host, url);
-        newFile.createNewFile();
+        boolean created = newFile.createNewFile();
         FileWriter writer = new FileWriter(newFile);
         writer.write(body);
         writer.close();
+        return created;
     }
 
     public static void deleteFile(String host, String url) throws FileNotFoundException {
