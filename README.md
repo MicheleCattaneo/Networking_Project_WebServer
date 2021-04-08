@@ -22,22 +22,21 @@ On success the server will start accepting and handling concurrent requests.
 
 ### **Basic request example**
 
-The requests need to follow the http standards.
+The requests need to follow the http standards. After opening the server with port 80 ( or any other ), we can send HTTP requests in different ways:
 
 **Netcat** example:
 
-Run the server on port 80 and run this command on a terminal to start a connection
-
-`netcat localhost 80`
-
-Add the following request:
-
-```http
-GET /home.html HTTP/1.0
-
+```shell
+printf "GET / HTTP/1.0\r\n\r\n" | nc 127.0.0.1 80
 ```
 
-To finish an http request you need  `\r\n` , in this case an empty line is delimiting your request and the response will be generated. In HTTP/1.0 the `Host` header is not mandatory, and in this case the first domain found in the `vhosts.conf` file will be used. With this version of http there is no support for `keep-alive` connections. More examples with `http/1.1` later.
+In HTTP/1.0 the `Host` header is not mandatory, and in this case the first domain found in the `vhosts.conf` file will be used. Therefore this is a valid http request. With this version of http there is no support for `keep-alive` connections. More examples with `http/1.1` later.
+
+```shell
+printf "NTW21INFO / HTTP/1.0\r\n\r\n" | nc 127.0.0.1 80
+```
+
+This command will send a response with informations about the administrator of the domain. In this case, since the request is again a 1.0, if the host is not specified, the default one is used.
 
 ---
 
@@ -45,7 +44,7 @@ To finish an http request you need  `\r\n` , in this case an empty line is delim
 
 **Postman** example:
 
-Run the server of port 80 and use the following request line:
+Writing the whole http request in the terminal can take time. Using Postman instead we can send request with having a graphical interface.
 
 ```http
 GET http://localhost:80 /home.html
@@ -59,7 +58,7 @@ Then, on the headers tab, look at the hidden ones and remove the default `Host` 
 
 Using a web browser you have no control over the headers sent by the client. You will then have to edit the hosts file of your operating system to map your 127.0.0.1 IP adress to your domains. For MacOS/Linux:
 
-```shell
+```bash
 sudo vim /etc/hosts
 ```
 
