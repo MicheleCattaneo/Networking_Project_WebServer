@@ -146,6 +146,10 @@ public class Server {
         return d.entryPointFile;
     }
 
+    /**
+     * Get the server's time in a format that is used to be sent in an http response.
+     * @return a String representing the time stamp.
+     */
     public String getServerCurrentTime() {
         return dateFormat.format(calendar.getTime());
     }

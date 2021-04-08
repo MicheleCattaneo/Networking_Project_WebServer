@@ -1,19 +1,17 @@
+
+
 # Networking_Project_WebServer
 
 ### Implementation of a Web Server using a subset of http requests
 
 ### **Usage**
 
-```shell
-// generate .class files
-javac server/*.java
-// run with default port
-java server.Main
-// run with given port
-java server.Main 8080
-```
+Generate .class files: `javac server/*.java`
 
-Start the program by passing an optional port number argument. By default, if no argument is given, it will listen on port 80.
+Run with default port (port 80): `java server.Main`
+
+Run with given port 8080 (or any other): `java server.Main 8080`
+
 The server will try to set itself up, by reading the `vhosts.conf` file, which specifies all the domains hosted on this server.
 On success the server will start accepting and handling concurrent requests.
 
@@ -49,6 +47,8 @@ GET http://localhost:80 /home.html
 
 Then, on the headers tab, look at the hidden ones and remove the default `Host` header, as it will be set to be `localhost` . Use instead the desired host, as for example `michelecattaneo.ch`. Note that postman will use HTTP/1.1 by default and if you want the connection to close after the reponse the `Connection: close` header should be set.
 
+Postman is particularly useful to send PUT requests where the content is an image: In the body tab select 'binary' as a type and upload an image. Then keep the headers that are automatically set by Postman and add in the request line the path where you want the new file to be added. 
+
 ---
 
 **Web Browser** example:
@@ -83,14 +83,15 @@ Connection: close
 
 Would return a `403 FORBIDDEN` as we would be trying to access a folder outside the scope of the Host folder.
 
-     _________
-    / ======= \
-   / __________\
-  | ___________ |
-  | | -       | |
-  | |         | |
-  | |_________| |________________________
-  \=____________/                        )
-  / """"""""""" \                       /
- / ::::::::::::: \                  =D-'
-(_________________)
+---
+
+- Contributions: Always worked together.
+
+|                  | Task                                        |
+| ---------------- | ------------------------------------------- |
+| Michele Cattaneo | A B C D E F G H I J , Optional A Optional B |
+| Luca de Felice   | A B C D E F G H I J , Optional A Optional B |
+| Martino Giorgi   | A B C D E F G H I J , Optional A Optional B |
+
+
+
