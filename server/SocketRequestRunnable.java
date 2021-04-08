@@ -47,31 +47,22 @@ public class SocketRequestRunnable implements Runnable {
             response = new HTTPResponse(server);
             InputStream input = clientSocket.getInputStream();
             OutputStream output = clientSocket.getOutputStream();
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            String line;
 
+            String line;
             // read request line and headers
-            line = reader.readLine(); // read request line
+            line = readLineOfBytes(input); // read request line
             if (request.parseRequestLine(line)) {
-                while (!(line = reader.readLine()).equals("")) {
+                while (!(line = readLineOfBytes(input)).equals("")) {
                     request.parseAndComputeLine(line);
                 }
             }
 
-
             if (!request.isMalformed() && request.shouldHaveBody()) {
                 
-                // byte[] byteArray = input.readNBytes(request.getContentLength());
-                // byte[] byteArray = input.readAllBytes();
-                DataInputStream inFromClient = new DataInputStream(input);
-                byte[] byteArray = new byte[2048];
-                inFromClient.readFully(byteArray, 0, request.getContentLength());
+                byte[] byteArray = input.readNBytes(request.getContentLength());
                 request.setBody(byteArray);
-                for (int i = 0; i < 10; i++) {
-                    System.out.println(byteArray[i]);
-                }
-                System.out.println(byteArray.length);
+                //System.out.println(new String(byteArray));
+                
                 // int byteSum = 0;
                 // while (byteSum < request.getContentLength()) {
                 //     line = reader.readLine();
@@ -91,6 +82,19 @@ public class SocketRequestRunnable implements Runnable {
 
         } while (!response.isLastOne());
         closeConnection();
+    }
+
+    private String readLineOfBytes(InputStream input) throws IOException {
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        int b = input.read();
+        int c = input.read();
+        while (!(b == '\r' && c == '\n')) {
+            bStream.write(b);
+            b = c;
+            c = input.read();
+        }
+        System.out.println(bStream.toString());
+        return bStream.toString();
     }
 
     /**
