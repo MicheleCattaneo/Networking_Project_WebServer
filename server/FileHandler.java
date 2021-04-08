@@ -2,6 +2,7 @@ package server;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -89,12 +90,15 @@ public class FileHandler {
      * @return True if the file was created, False if the file was edited
      * @throws IOException error creating the file or writing to it
      */
-    public static boolean createFile(String host, String url, String body) throws IOException {
+    public static boolean createFile(String host, String url, byte[] body) throws IOException {
         File newFile = new File(host, url);
         boolean created = newFile.createNewFile();
-        FileWriter writer = new FileWriter(newFile);
-        writer.write(body);
-        writer.close();
+        FileOutputStream stream = new FileOutputStream(newFile);
+        // FileWriter writer = new FileWriter(newFile);
+        // writer.write(body);
+        stream.write(body);
+        // writer.close();
+        stream.close();
         return created;
     }
 

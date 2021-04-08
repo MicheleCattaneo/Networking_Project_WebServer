@@ -155,16 +155,17 @@ public class HTTPResponse {
             return this;
         }
 
-        if (request.getHeaderValue("Content-Length").isEmpty() || request.getHeaderValue("Content-Type").isEmpty()
-                || Integer.parseInt(request.getHeaderValue("Content-Length").get()) != request.getBody().length()) {
+        // || Integer.parseInt(request.getHeaderValue("Content-Length").get()) != request.getBody().length
+        if (request.getHeaderValue("Content-Length").isEmpty() || request.getHeaderValue("Content-Type").isEmpty()) {
             this.status = StatusCode.BAD_REQUEST;
             lastResponse = true;
             return this;
         }
 
         try {
-            boolean isCreated = FileHandler.createFile(request.getHeaderValue("Host").get(), request.getUrl(),
-                    request.getBody());
+            boolean isCreated = FileHandler.createFile(request.getHeaderValue("Host").get(), 
+                                                        request.getUrl(),
+                                                        request.getBody());
 
             this.status = isCreated ? StatusCode.CREATED : StatusCode.OK;
             headers.put("Content-Location", request.getUrl());

@@ -15,14 +15,13 @@ public class HTTPRequest {
     private String url;
     private String version;
     private HashMap<String, String> headers;
-    private String body;
+    private byte[] body;
     private boolean malformed;
     private final Server server;
 
     public HTTPRequest(Server server) {
         this.server = server;
         headers = new HashMap<>();
-        this.body = "";
     }
 
     /**
@@ -89,7 +88,7 @@ public class HTTPRequest {
     }
 
     /**
-     * Check wheather the given header is a known one to this implementation.
+     * Check whether the given header is a known one to this implementation.
      * 
      * @param header the header String
      * @return true if known, false otherwise
@@ -154,9 +153,9 @@ public class HTTPRequest {
      * 
      * @return the String corresponding to the body. Could be null.
      */
-    public String getBody() {
-        return this.body;
-    }
+    // public String getBody() {
+    //     return this.body;
+    // }
 
     /**
      * Returns an optional String containing the value of the given header.
@@ -174,13 +173,22 @@ public class HTTPRequest {
      * 
      * @param line the line to append.
      */
-    public void appendBody(String line) {
-        if (body.length() > 0) {
-            body += '\n';
-        }
-        body += line;
+    // public void appendBody(String line) {
+    //     if (body.length() > 0) {
+    //         body += '\n';
+    //     }
+    //     body += line;
+    // }
+
+    public void setBody(byte[] body) {
+        this.body = body;
     }
 
+    
+    public byte[] getBody() {
+        return this.body;
+    }
+    
     /**
      * Print this request
      */
@@ -196,7 +204,7 @@ public class HTTPRequest {
     }
 
     /**
-     * Check various contraints AFTER the request is fully parsed
+     * Check various constraints AFTER the request is fully parsed
      */
     public void checkValidity() {
         // check host is necessary and/or present

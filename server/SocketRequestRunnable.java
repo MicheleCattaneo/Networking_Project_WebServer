@@ -1,12 +1,15 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import jdk.javadoc.internal.doclets.formats.html.SourceToHTMLConverter;
 import server.message.HTTPRequest;
 import server.message.HTTPResponse;
 
@@ -44,7 +47,7 @@ public class SocketRequestRunnable implements Runnable {
             response = new HTTPResponse(server);
             InputStream input = clientSocket.getInputStream();
             OutputStream output = clientSocket.getOutputStream();
-
+            
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             String line;
 
@@ -56,16 +59,29 @@ public class SocketRequestRunnable implements Runnable {
                 }
             }
 
+
             if (!request.isMalformed() && request.shouldHaveBody()) {
-                int byteSum = 0;
-                while (byteSum < request.getContentLength()) {
-                    line = reader.readLine();
-                    request.appendBody(line);
-                    byteSum += line.getBytes().length;
+                
+                // byte[] byteArray = input.readNBytes(request.getContentLength());
+                // byte[] byteArray = input.readAllBytes();
+                DataInputStream inFromClient = new DataInputStream(input);
+                byte[] byteArray = new byte[2048];
+                inFromClient.readFully(byteArray, 0, request.getContentLength());
+                request.setBody(byteArray);
+                for (int i = 0; i < 10; i++) {
+                    System.out.println(byteArray[i]);
                 }
-                if (byteSum != request.getContentLength()) {
-                    request.setMalformed();
-                }
+                System.out.println(byteArray.length);
+                // int byteSum = 0;
+                // while (byteSum < request.getContentLength()) {
+                //     line = reader.readLine();
+                //     request.appendBody(line);
+                //     byteSum += line.getBytes().length;
+                // }
+                // if (byteSum != request.getContentLength()) {
+                //     request.setMalformed();
+                // }
+                System.out.println("hi");
 
             }
             response = new HTTPResponse(server).handleRequest(request);
