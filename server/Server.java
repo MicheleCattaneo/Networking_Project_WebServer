@@ -1,6 +1,9 @@
 package server;
 
+import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.*;
 import java.nio.file.*;
+import java.text.SimpleDateFormat;
 
 public class Server {
     private final int THREAD_COUNT = Runtime.getRuntime().availableProcessors() + 1;
@@ -17,6 +21,8 @@ public class Server {
     private boolean isRunning;
     private LinkedHashMap<String, DomainInformations> domainMap;
     public final String serverRootPath;
+    private SimpleDateFormat dateFormat; 
+    private final Calendar calendar;
 
     private final int PORT;
 
@@ -26,6 +32,10 @@ public class Server {
         serverSocket = new ServerSocket(port);
         domainMap = new LinkedHashMap<>();
         serverRootPath = Path.of("").toAbsolutePath().toString();
+
+        dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.UK);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        calendar = Calendar.getInstance();
     }
 
     /**
@@ -134,6 +144,10 @@ public class Server {
             return null;
         }
         return d.entryPointFile;
+    }
+
+    public String getServerCurrentTime() {
+        return dateFormat.format(calendar.getTime());
     }
 
     /**

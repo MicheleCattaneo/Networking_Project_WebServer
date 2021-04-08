@@ -3,7 +3,6 @@ package server.message;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.time.LocalDateTime;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
@@ -121,10 +120,10 @@ public class HTTPResponse {
             if (!FileHandler.hasPermissions(request.getHeaderValue("Host").get(), request.getUrl())) { // if it has
                                                                                                        // permissions
                 this.status = StatusCode.FORBIDDEN;
-                this.headers.put("Date", LocalDateTime.now().toString());
+                this.headers.put("Date", server.getServerCurrentTime());
                 return this;
             }
-            headers.put("Date", LocalDateTime.now().toString());
+            headers.put("Date", server.getServerCurrentTime());
             String ext = FileHandler.getFileType(request.getUrl());
             String contentType = FileHandler.mapExtensionsToContentType(ext);
             headers.put("Content-Type", contentType);
@@ -133,7 +132,7 @@ public class HTTPResponse {
             headers.put("Content-Length", String.valueOf(body.length));
         } else {
             this.status = StatusCode.NOT_FOUND;
-            this.headers.put("Date", LocalDateTime.now().toString());
+            this.headers.put("Date", server.getServerCurrentTime());
             lastResponse = true;
             return this;
         }
@@ -150,7 +149,7 @@ public class HTTPResponse {
         if (!FileHandler.hasPermissions(request.getHeaderValue("Host").get(), request.getUrl())) { // if it has
             // permissions
             this.status = StatusCode.FORBIDDEN;
-            this.headers.put("Date", LocalDateTime.now().toString());
+            this.headers.put("Date", server.getServerCurrentTime());
             lastResponse = true;
             return this;
         }
@@ -169,11 +168,11 @@ public class HTTPResponse {
 
             this.status = isCreated ? StatusCode.CREATED : StatusCode.OK;
             headers.put("Content-Location", request.getUrl());
-            headers.put("Date", LocalDateTime.now().toString());
+            headers.put("Date", server.getServerCurrentTime());
 
         } catch (IOException e) {
             this.status = StatusCode.INTERNAL_SERVER_ERROR;
-            headers.put("Date", LocalDateTime.now().toString());
+            headers.put("Date", server.getServerCurrentTime());
             lastResponse = true;
             return this;
         }
@@ -192,14 +191,14 @@ public class HTTPResponse {
         if (!FileHandler.hasPermissions(request.getHeaderValue("Host").get(), request.getUrl())) { // if it has
             // permissions
             this.status = StatusCode.FORBIDDEN;
-            this.headers.put("Date", LocalDateTime.now().toString());
+            this.headers.put("Date", server.getServerCurrentTime());
             lastResponse = true;
             return this;
         }
         try {
             FileHandler.deleteFile(request.getHeaderValue("Host").get(), request.getUrl());
             this.status = StatusCode.OK;
-            headers.put("Date", LocalDateTime.now().toString());
+            headers.put("Date", server.getServerCurrentTime());
         } catch (FileNotFoundException e) {
             this.status = StatusCode.NOT_FOUND;
             lastResponse = true;
@@ -218,7 +217,7 @@ public class HTTPResponse {
         Optional<String> host = request.getHeaderValue("Host");
         if (host.isPresent()) {
             this.status = StatusCode.OK;
-            headers.put("Date", LocalDateTime.now().toString());
+            headers.put("Date", server.getServerCurrentTime());
 
             LinkedHashMap<String, DomainInformations> map = (LinkedHashMap<String, DomainInformations>) server
                     .getDomainsInformations();

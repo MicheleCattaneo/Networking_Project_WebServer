@@ -44,7 +44,7 @@ This command will send a response with informations about the administrator of t
 
 **Postman** example:
 
-Writing the whole http request in the terminal can take time. Using Postman instead we can send request with having a graphical interface.
+Writing the whole http request in the terminal can take time. Using Postman instead we can send request having a graphical interface.
 
 ```http
 GET http://localhost:80 /home.html
