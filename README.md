@@ -1,11 +1,12 @@
 # Networking_Project_WebServer
+
 ### Implementation of a Web Server using a subset of http requests
 
 ### **Usage**
 
 ```shell
 // generate .class files
-javac server/*.java    
+javac server/*.java
 // run with default port
 java server.Main
 // run with given port
@@ -14,11 +15,9 @@ java server.Main 8080
 
 Start the program by passing an optional port number argument. By default, if no argument is given, it will listen on port 80.
 The server will try to set itself up, by reading the `vhosts.conf` file, which specifies all the domains hosted on this server.
-On success the server will start accepting and handling concurrent requests. 
+On success the server will start accepting and handling concurrent requests.
 
 ---
-
-
 
 ### **Basic request example**
 
@@ -39,8 +38,6 @@ printf "NTW21INFO / HTTP/1.0\r\n\r\n" | nc 127.0.0.1 80
 This command will send a response with informations about the administrator of the domain. In this case, since the request is again a 1.0, if the host is not specified, the default one is used.
 
 ---
-
-
 
 **Postman** example:
 
@@ -72,8 +69,6 @@ After that you will be able to access your domain from your browser, which will 
 
 ---
 
-
-
 ### File System access
 
 Each domain has a dedicated folder. Requests to a specific host are limited in the access to files/objects that are inside that specific folder. For example:
@@ -88,3 +83,14 @@ Connection: close
 
 Would return a `403 FORBIDDEN` as we would be trying to access a folder outside the scope of the Host folder.
 
+     _________
+    / ======= \
+   / __________\
+  | ___________ |
+  | | -       | |
+  | |         | |
+  | |_________| |________________________
+  \=____________/                        )
+  / """"""""""" \                       /
+ / ::::::::::::: \                  =D-'
+(_________________)
