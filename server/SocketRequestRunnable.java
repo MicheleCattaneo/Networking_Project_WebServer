@@ -1,15 +1,10 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-
-import jdk.javadoc.internal.doclets.formats.html.SourceToHTMLConverter;
 import server.message.HTTPRequest;
 import server.message.HTTPResponse;
 
@@ -38,6 +33,7 @@ public class SocketRequestRunnable implements Runnable {
      * Handle the HTTP request.
      */
     private void handleHTTPRequest() throws IOException {
+        // Uncomment to see client's address
         // System.out.println("----> Handling clientSocket from " +
         // clientSocket.getInetAddress());
 
@@ -47,41 +43,20 @@ public class SocketRequestRunnable implements Runnable {
             response = new HTTPResponse(server);
             InputStream input = clientSocket.getInputStream();
             OutputStream output = clientSocket.getOutputStream();
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            String line;
 
+            String line;
             // read request line and headers
-            line = reader.readLine(); // read request line
+            line = readLineOfBytes(input); // read request line
             if (request.parseRequestLine(line)) {
-                while (!(line = reader.readLine()).equals("")) {
+                while (!(line = readLineOfBytes(input)).equals("")) {
                     request.parseAndComputeLine(line);
                 }
             }
 
-
             if (!request.isMalformed() && request.shouldHaveBody()) {
                 
-                // byte[] byteArray = input.readNBytes(request.getContentLength());
-                // byte[] byteArray = input.readAllBytes();
-                DataInputStream inFromClient = new DataInputStream(input);
-                byte[] byteArray = new byte[2048];
-                inFromClient.readFully(byteArray, 0, request.getContentLength());
+                byte[] byteArray = input.readNBytes(request.getContentLength());
                 request.setBody(byteArray);
-                for (int i = 0; i < 10; i++) {
-                    System.out.println(byteArray[i]);
-                }
-                System.out.println(byteArray.length);
-                // int byteSum = 0;
-                // while (byteSum < request.getContentLength()) {
-                //     line = reader.readLine();
-                //     request.appendBody(line);
-                //     byteSum += line.getBytes().length;
-                // }
-                // if (byteSum != request.getContentLength()) {
-                //     request.setMalformed();
-                // }
-                System.out.println("hi");
 
             }
             response = new HTTPResponse(server).handleRequest(request);
@@ -93,6 +68,19 @@ public class SocketRequestRunnable implements Runnable {
         closeConnection();
     }
 
+    private String readLineOfBytes(InputStream input) throws IOException {
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        int b = input.read();
+        int c = input.read();
+        while (!(b == '\r' && c == '\n')) {
+            bStream.write(b);
+            b = c;
+            c = input.read();
+        }
+        System.out.println(bStream.toString());
+        return bStream.toString();
+    }
+
     /**
      * Close this socket connection.
      * 
@@ -100,7 +88,7 @@ public class SocketRequestRunnable implements Runnable {
      */
     private void closeConnection() throws IOException {
         clientSocket.close();
-        System.out.println("----> Closed connection");
+        // System.out.println("----> Closed connection");
     }
 
     /**

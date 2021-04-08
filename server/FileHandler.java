@@ -3,7 +3,6 @@ package server;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,10 +93,7 @@ public class FileHandler {
         File newFile = new File(host, url);
         boolean created = newFile.createNewFile();
         FileOutputStream stream = new FileOutputStream(newFile);
-        // FileWriter writer = new FileWriter(newFile);
-        // writer.write(body);
         stream.write(body);
-        // writer.close();
         stream.close();
         return created;
     }
